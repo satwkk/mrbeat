@@ -1,20 +1,20 @@
 import re
 import aiohttp
 import asyncio
+import discord
+import youtube_dl
+
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+YDL_OPTIONS = {'format': 'bestaudio'}
 
 class Youtube():
-    async def youtube_search(self, keyword):
-        params = {'search_query': f'{keyword}'}
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://www.youtube.com/results", params=params) as response:
-                response = await response.text()
-            found = re.findall(r'watch\?v=(\S{11})', response)
-            return f"https://www.youtube.com/watch?v={found[0]}"
-    
-    def get_final_url(self, keyword):
-        result = asyncio.get_event_loop()
-        url = result.run_until_complete(self.youtube_search(keyword))
-        return url
+    def __init__(self):
+        pass
 
+    async def extract_audio(self, url):
+        with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+            info = ydl.extract_info(url, download=False)
+            music_url = info['formats'][0]['url']
+            audio_source = await discord.FFmpegOpusAudio.from_probe(music_url, **FFMPEG_OPTIONS)
+        return audio_source
 
-yt = Youtube()

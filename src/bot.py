@@ -1,13 +1,14 @@
+import re
 import json
 import random
+import aiohttp
+import asyncio
 import discord
-import youtube_dl
+from src.youtube import Youtube
 from discord.ext import commands
 
 # CONSTANTS
 CMD_PREFIX = "-"
-FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-YDL_OPTIONS = {'format': 'bestaudio'}
 
 class Bot():
     intents = discord.Intents.default()
@@ -56,13 +57,19 @@ class Bot():
     @bot.command(name="play")
     async def play_music(ctx, *, url):
         ctx.voice_client.stop()
-        voice_client = ctx.voice_client
-        # print(url)
-        with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
-            info = ydl.extract_info(url, download=False)
-            music_url = info['formats'][0]['url']
-            audio_source = await discord.FFmpegOpusAudio.from_probe(music_url, **FFMPEG_OPTIONS)
-            voice_client.play(audio_source)
+        yt = Youtube()
+        if url.startswith('http'):
+            audio_source = await yt.extract_audio(url)    
+            ctx.voice_client.play(audio_source)
+        else:
+            params = {'search_query': f'{url}'}
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://www.youtube.com/results", params=params) as response:
+                    response = await response.text()
+                found = re.findall(r'watch\?v=(\S{11})', response)
+                final_url = f"https://www.youtube.com/watch?v={found[0]}"
+                audio_source = await yt.extract_audio(final_url)
+                ctx.voice_client.play(audio_source)
 
     @bot.command(name="pause")
     async def pause_music(ctx):
@@ -73,5 +80,5 @@ class Bot():
     async def resume_music(ctx):
         ctx.voice_client.resume()
         await ctx.channel.send("RESUMING !!")
-    
+
 mybot = Bot()
