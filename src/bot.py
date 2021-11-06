@@ -1,3 +1,5 @@
+import json
+import random
 import discord
 import youtube_dl
 from discord.ext import commands
@@ -14,9 +16,20 @@ class Bot():
 
     def __init__(self):
         pass
+    
+    @staticmethod
+    def parse_json():
+        with open('config.json') as file_handle:
+            cmds = json.load(file_handle)
+        return cmds
 
     async def on_ready(self):
         print("Bot ready")
+
+    @bot.command(name="hello")
+    async def greet(ctx):
+        greet = random.choice(Bot.parse_json()["greeting"])
+        await ctx.channel.send(f"{greet} {ctx.message.author.mention}")
 
     @bot.command(name="users")
     async def get_users_count(ctx):
@@ -24,7 +37,7 @@ class Bot():
     
     @bot.command(name="owner")
     async def get_guild_owner(ctx):
-       await ctx.channel.send(f"Owner of the channel: {ctx.guild.owner.name}") 
+       await ctx.channel.send(f"Our king 👑 : {ctx.guild.owner.name}") 
     
     @bot.command(name="join")
     async def join(ctx):
@@ -44,7 +57,7 @@ class Bot():
     async def play_music(ctx, *, url):
         ctx.voice_client.stop()
         voice_client = ctx.voice_client
-        print(url)
+        # print(url)
         with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
             info = ydl.extract_info(url, download=False)
             music_url = info['formats'][0]['url']
@@ -60,5 +73,5 @@ class Bot():
     async def resume_music(ctx):
         ctx.voice_client.resume()
         await ctx.channel.send("RESUMING !!")
-
+    
 mybot = Bot()
