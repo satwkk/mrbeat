@@ -1,6 +1,3 @@
-import re
-import aiohttp
-import asyncio
 import discord
 import youtube_dl
 
@@ -17,4 +14,3 @@ class Youtube():
             music_url = info['formats'][0]['url']
             audio_source = await discord.FFmpegOpusAudio.from_probe(music_url, **FFMPEG_OPTIONS)
         return audio_source
-

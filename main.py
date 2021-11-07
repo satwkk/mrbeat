@@ -1,13 +1,16 @@
 import os
-from os.path import dirname, join
-import dotenv
-from src.bot import mybot
-from dotenv import load_dotenv
+from bot import mybot
+TOKEN = os.environ['TOKEN']
 
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-
-TOKEN = os.environ.get("TOKEN")
+COGS = [
+        "greetings",
+        "stats",
+        "music",
+        "errors"
+    ]
 
 if __name__ == "__main__":
+    for cog in COGS:
+        mybot.bot.load_extension(cog)
     mybot.bot.run(TOKEN)
+
