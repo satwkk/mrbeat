@@ -1,8 +1,6 @@
-# Mr Beat
+# Mr Beat (UNDER DEVELOPMENT)
 
 A simple discord music bot with few other useful commands i created as a project for my discord channel as groovy and rythm expired.
-
-## Note: Bot is under developemet for now.
 
 ## Commands available for now
 
