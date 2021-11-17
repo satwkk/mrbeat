@@ -95,8 +95,8 @@ class Music(commands.Cog):
         embed_msg = self.music_embed.add_embed_fields(self.song.get_title(), ctx.message.author, self.song.get_thumbnail())
         await ctx.channel.send(embed=embed_msg)
         self.music_embed.destroy_embed()
-
-        ''' Creating an embed '''
+        
+        ''' Playing the audio souce '''
         if audio_source:
             ctx.voice_client.play(audio_source)
 
