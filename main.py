@@ -6,7 +6,8 @@ COGS = [
         "src.greetings",
         "src.stats",
         "src.music",
-        "src.errors"
+        "src.errors",
+        "src.events"
     ]
 
 if __name__ == "__main__":

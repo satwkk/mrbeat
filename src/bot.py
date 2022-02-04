@@ -10,9 +10,5 @@ class Bot():
 
     def __init__(self):
         pass
-    
-    @bot.event
-    async def on_ready():
-        print("Bot ready")
 
 mybot = Bot()
