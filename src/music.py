@@ -80,36 +80,36 @@ class Music(commands.Cog):
             ctx.voice_client.play(audio_source, after=lambda e: self.bot.loop.create_task(self.play_next_song(ctx)))
         
     ######################################################## COMMANDS ########################################################################
+    ''' Pauses the currently playing song'''
     @commands.command(aliases=['pau', 'paus', 'stop', 'pa'], pass_context=True)
     async def pause(self, ctx):
-        ''' Pauses the currently playing song'''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
         await ctx.channel.send("PAUSED ⏸")
         ctx.voice_client.pause()
 
+    ''' Resumes the currently paused song'''
     @commands.command(aliases=['r', 'res', 'resum', 'resu'], pass_context=True)
     async def resume(self, ctx):
-        ''' Resumes the currently paused song'''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
         await ctx.channel.send("RESUMED ⏯")
         ctx.voice_client.resume()
 
+    ''' Removes the bot from voice channel '''
     @commands.command(aliases=['lea', 'leav'], pass_context=True)
     async def leave(self, ctx):
-        ''' Removes the bot from voice channel '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
         del self.queue[ctx.guild.name]
         await ctx.voice_client.disconnect()
     
+    ''' Adds song into the queue. '''
     @commands.command(aliases=['q', 'que'], pass_context=True)
     async def queue(self, ctx, *, song):
-        ''' Adds song into the queue. '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
@@ -122,12 +122,12 @@ class Music(commands.Cog):
         else:
             await ctx.channel.send('Play a fucking music before queuing retard.')
     
+    ''' 
+    List all music in queue 
+    TODO: Create an embed to send queued items.
+    '''
     @commands.command(aliases=['l', 'lq', 'listq', 'listqueue'], pass_context=True)
     async def list_queue(self, ctx):
-        ''' 
-        List all music in queue 
-        TODO: Create an embed to send queued items.
-        '''
         if self.is_queue_empty(ctx):
             return await ctx.channel.send('No songs in queue')
         
@@ -140,9 +140,9 @@ class Music(commands.Cog):
     async def debug(self, ctx):
         print(self.queue)
         
+    ''' Clears the queue. '''
     @commands.command(aliases=['f', 'fl', 'fq', 'flushq', 'flushqueue'], pass_context=True)
     async def flush(self, ctx):
-        ''' Clears the queue. '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
@@ -150,9 +150,9 @@ class Music(commands.Cog):
             await ctx.channel.send('No songs in queue.')
         self.queue[ctx.guild.name].clear()
     
+    ''' Skips to the next song '''
     @commands.command(aliases=['s', 'sk', 'ski'], pass_context=True)
     async def skip(self, ctx):
-        ''' Skips to the next song '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
 
@@ -161,9 +161,9 @@ class Music(commands.Cog):
         else:
             await ctx.channel.send('No songs in queue to skip.')
           
+    ''' Plays the music based on keyword '''    
     @commands.command(aliases=['p', 'pla', 'pl'], pass_context=True)
     async def play(self, ctx, *, url):
-        ''' Plays the music based on keyword '''    
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
 
