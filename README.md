@@ -10,6 +10,7 @@ play <song name>
 play <youtube url>
 queue
 list_queue (lq, l)
+editqueue (eq, editq)
 flush
 skip
 users

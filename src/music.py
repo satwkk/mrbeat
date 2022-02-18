@@ -1,6 +1,5 @@
 import re
 import discord
-import asyncio
 import youtube_dl
 import http.client
 from discord import Embed
@@ -15,22 +14,17 @@ class Song():
 class Youtube():
     def __init__(self):
         self.YDL_OPTIONS = {'format': 'bestaudio/best', 'noplaylist':'True'}
+        self.streaming_url = 'www.youtube.com'
+        self.conn = http.client.HTTPSConnection(self.streaming_url)
+        self.ytdl = youtube_dl.YoutubeDL(self.YDL_OPTIONS)
 
-    def create_youtubde_dl_player(self):
-        return youtube_dl.YoutubeDL(self.YDL_OPTIONS)
-
-    def fetch_music_url(self, url: str) -> str:
-        connection = http.client.HTTPSConnection('www.youtube.com')
-        connection.request('GET', f'/results?search_query={url.replace(" ", "+") if " " in url else url}')
-        response = connection.getresponse()
-        body = response.read()
+    def fetch_music_data(self, url: str) -> [str, str, str]:
+        self.conn.request('GET', f'/results?search_query={url.replace(" ", "+") if " " in url else url}')
+        body = self.conn.getresponse().read()
         urls = re.findall(r'watch\?v=(\S{11})', body.decode())
-        return urls[0]
-
-    def extract_audio_info(self, url: str) -> [str, str, str]:
-        ytdl = self.create_youtubde_dl_player()
-        info = ytdl.extract_info(url, download=False)
-        return [info['formats'][0]['url'], info['title'], info['thumbnail']]
+        meta_data = self.ytdl.extract_info(urls[0], download=False)
+        self.conn.close()
+        return [meta_data['formats'][0]['url'], meta_data['title'], meta_data['thumbnail']]
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -68,9 +62,7 @@ class Music(commands.Cog):
     async def play_song(self, url, ctx):
         ''' Fetches the url and plays the song. ''' 
         ctx.voice_client.stop()
-        music_url = self.youtube.fetch_music_url(url)
-        self.song.url, self.song.title, self.song.thumbnail = self.youtube.extract_audio_info(music_url)
-        
+        self.song.url, self.song.title, self.song.thumbnail = self.youtube.fetch_music_data(url)
         audio_source = await discord.FFmpegOpusAudio.from_probe(self.song.url, **self.FFMPEG_OPTIONS)
         if audio_source:
             music_embed = Embed(title="Playing 🎵", colour=0x3498db)
@@ -107,9 +99,11 @@ class Music(commands.Cog):
         del self.queue[ctx.guild.name]
         await ctx.voice_client.disconnect()
     
-    ''' Adds song into the queue. '''
     @commands.command(aliases=['q', 'que'], pass_context=True)
     async def queue(self, ctx, *, song):
+        ''' 
+        Adds song into the queue. 
+        '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
@@ -122,12 +116,12 @@ class Music(commands.Cog):
         else:
             await ctx.channel.send('Play a fucking music before queuing retard.')
     
-    ''' 
-    List all music in queue 
-    TODO: Create an embed to send queued items.
-    '''
     @commands.command(aliases=['l', 'lq', 'listq', 'listqueue'], pass_context=True)
     async def list_queue(self, ctx):
+        ''' 
+        List all music in queue 
+        TODO: Create an embed to send queued items.
+        '''
         if self.is_queue_empty(ctx):
             return await ctx.channel.send('No songs in queue')
         
@@ -137,12 +131,15 @@ class Music(commands.Cog):
         await ctx.channel.send(embed=embed)
         
     @commands.command(name='debug', pass_context=True)
+    @commands.has_role('Developer')
     async def debug(self, ctx):
         print(self.queue)
         
-    ''' Clears the queue. '''
     @commands.command(aliases=['f', 'fl', 'fq', 'flushq', 'flushqueue'], pass_context=True)
     async def flush(self, ctx):
+        ''' 
+        Clears the queue. 
+        '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
            
@@ -150,9 +147,11 @@ class Music(commands.Cog):
             await ctx.channel.send('No songs in queue.')
         self.queue[ctx.guild.name].clear()
     
-    ''' Skips to the next song '''
     @commands.command(aliases=['s', 'sk', 'ski'], pass_context=True)
     async def skip(self, ctx):
+        ''' 
+        Skips to the next song 
+        '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
 
@@ -161,9 +160,11 @@ class Music(commands.Cog):
         else:
             await ctx.channel.send('No songs in queue to skip.')
           
-    ''' Plays the music based on keyword '''    
     @commands.command(aliases=['p', 'pla', 'pl'], pass_context=True)
     async def play(self, ctx, *, url):
+        ''' 
+        Plays the music based on keyword
+        '''
         if ctx.message.author.voice is None:
             return await ctx.channel.send('Stop disturbing others dumbo, join a voice channel if you want to listen music.')
 
@@ -172,7 +173,7 @@ class Music(commands.Cog):
             self.queue[ctx.guild.name] = []
             
         if not self.is_queue_empty(ctx):
-            await ctx.channel.send(f"There are music in queues retard {ctx.message.author}.")
+            await ctx.channel.send(f"There are music in queues retard.")
         else:
             await self.play_song(url, ctx)
             
