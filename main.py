@@ -1,6 +1,6 @@
-from src.bot import mybot
+from src.bot import MrBeat
 
-TOKEN = os.environ['TOKEN']
+TOKEN = ""
 
 COGS = [
         "src.greetings",
@@ -11,6 +11,7 @@ COGS = [
     ]
 
 if __name__ == "__main__":
+    mrbeat = MrBeat()
     for cog in COGS:
-        mybot.bot.load_extension(cog)
-    mybot.bot.run(TOKEN)
+        mrbeat.load_extension(cog)
+    mrbeat.run(TOKEN)

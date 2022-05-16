@@ -1,14 +1,9 @@
 import discord
 from discord.ext import commands
 
-CMD_PREFIX = "-"
-
-class Bot():
-    intents = discord.Intents.default()
-    intents.members = True
-    bot = commands.Bot(command_prefix=CMD_PREFIX, intents=intents)
-
+class MrBeat(commands.Bot):
     def __init__(self):
-        pass
+        intents = discord.Intents.default()
+        intents.members = True
+        super().__init__(command_prefix="-", intents=intents)
 
-mybot = Bot()
